@@ -7,10 +7,10 @@ on:
   workflow_dispatch:  # Allow manual triggering
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}  # Your Google Cloud project ID
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}  # Your Google Cloud project ID
   SERVICE_NAME: finance-collector  # The name of your Cloud Run service
   REGION: asia-northeast3  # The region of your Cloud Run service (Seoul)
-  REGISTRY: gcr.io  # Google Container Registry
+  REGISTRY: ${{ vars.GCP_REGISTRY_ID }}  # Google Container Registry
   
   # Environment variables for the application
   CLIENT_ID: ${{ secrets.CLIENT_ID }}
