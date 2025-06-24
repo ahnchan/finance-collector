@@ -1,0 +1,42 @@
+
+### Token
+POST http://localhost:8000/token
+Content-Type: application/json
+
+{
+    "client_id": "sample_client_id",    
+    "client_secret": "sample_client_secret"
+}
+
+### Get data
+GET http://localhost:8000/ticker/AAPL
+Content-Type: application/json
+Accept: application/json
+X-API-Key: sample_api_key
+
+### Get data
+GET http://localhost:8000/ticker/^VIX
+Content-Type: application/json
+Accept: application/json
+X-API-Key: J7J8HQpHYukztVQH
+
+### Get token for client credentials
+POST http://localhost:8000/token
+Content-Type: application/json
+
+{
+    "client_id": "sample_client_id",    
+    "client_secret": "sample_client_secret"
+}
+
+### Get ticker data for a specific date using token authentication
+GET http://localhost:8000/ticker/AAPL/date/2023-01-03
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYW1wbGVfY2xpZW50X2lkIiwiZXhwIjoxNzUwNTc1NDQxfQ.2M3s2camzoIeOhSqMZR_9Z_a-n5Z3QSEwJWMYNrwQfM
+
+### Get ticker data for a specific date with country override
+GET http://localhost:8000/ticker/005930.KS/date/2023-01-03
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYW1wbGVfY2xpZW50X2lkIiwiZXhwIjoxNzE5MDQ1MzYwfQ.Yx-KQIcJPiZQxvQDUQgfhblCLGGBpGvUYvD-NwxA_Ow

@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: finance-collector-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      # Exclude .env from volume mounting to use the one in the container
+      - /app/.env
+    environment:
+      # Default environment variables (will be overridden by .env if present)
+      - CLIENT_ID=default_client_id
+      - CLIENT_SECRET=default_client_secret
+      - JWT_SECRET_KEY=default_secret_key
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRATION_MINUTES=30
+    restart: unless-stopped

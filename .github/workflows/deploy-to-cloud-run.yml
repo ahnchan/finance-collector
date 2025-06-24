@@ -1,0 +1,74 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to main branch
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}  # Your Google Cloud project ID
+  SERVICE_NAME: finance-collector  # The name of your Cloud Run service
+  REGION: asia-northeast3  # The region of your Cloud Run service (Seoul)
+  REGISTRY: gcr.io  # Google Container Registry
+  
+  # Environment variables for the application
+  CLIENT_ID: ${{ secrets.CLIENT_ID }}
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+  JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM || 'HS256' }}
+  JWT_EXPIRATION_MINUTES: ${{ secrets.JWT_EXPIRATION_MINUTES || '30' }}
+  API_KEY: ${{ secrets.API_KEY }}
+
+jobs:
+  deploy:
+    name: Deploy to Cloud Run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Set up authentication to Google Cloud
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      # Configure Docker to use the gcloud command-line tool as a credential helper
+      - name: Configure Docker for Google Container Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGISTRY }}
+
+      # Build the Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
+
+      # Push the Docker image to Google Container Registry
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+
+      # Deploy the image to Google Cloud Run
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.REGION }}
+          image: ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          env_vars: |
+            CLIENT_ID=${{ env.CLIENT_ID }}
+            CLIENT_SECRET=${{ env.CLIENT_SECRET }}
+            JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }}
+            JWT_ALGORITHM=${{ env.JWT_ALGORITHM }}
+            JWT_EXPIRATION_MINUTES=${{ env.JWT_EXPIRATION_MINUTES }}
+            API_KEY=${{ env.API_KEY }}
+          flags: --allow-unauthenticated  # Remove if you want to require authentication
+
+      # Output the deployed service URL
+      - name: Show Service URL
+        run: |
+          echo "Service URL: $(gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ env.REGION }} --format 'value(status.url)')"
