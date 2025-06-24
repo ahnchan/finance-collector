@@ -11,7 +11,8 @@ env:
   SERVICE_NAME: finance-collector  # The name of your Cloud Run service
   REGION: asia-northeast3  # The region of your Cloud Run service (Seoul)
   REGISTRY: ${{ vars.GCP_REGISTRY_ID }}  # Google Container Registry
-  
+  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}  # Google Cloud service account key in JSON format
+
   # Environment variables for the application
   CLIENT_ID: ${{ secrets.CLIENT_ID }}
   CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
@@ -34,7 +35,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ env.PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          service_account_key: ${{ env.GCP_SA_KEY }}
           export_default_credentials: true
 
       # Configure Docker to use the gcloud command-line tool as a credential helper
